@@ -4,50 +4,50 @@ terminal PROGRAM, LEFTPAR, RIGHTPAR, SEMI, DOT, COLON, COMMA, ASSIGN, PLUS, STAR
 nonterminal Program, DeklProm, NizDekl, Deklaracija, NizImena, Tip, Blok, NizNar, Naredba, Ulaz, Izlaz, Dodela, Izraz, Pizraz, Fizraz, IfNar;
 
 Program ::= PROGRAM LEFTPAR NizImena LEFTPAR SEMI DeklProm Blok DOT
-  {: System.out.println("Pronasao Program") :} ;
+  {: System.out.println("Pronasao Program"); :} ;
 
 DeklProm ::= VAR NizDekl
-  {: System.out.println("Pronasao DeklProm") :} ;
+  {: System.out.println("Pronasao DeklProm"); :} ;
 
 NizDekl ::= NizDekl Deklaracija | Deklaracija
-  {: System.out.println("Pronasao NizDekl") :} ;
+  {: System.out.println("Pronasao NizDekl"); :} ;
 
 Deklaracija ::= NizImena COLON Tip
-  {: System.out.println("Pronasao Deklaracija") :} ;
+  {: System.out.println("Pronasao Deklaracija"); :} ;
 
 NizImena ::= NizImena COMMA ID | ID
-  {: System.out.println("Pronasao NizImena") :} ;
+  {: System.out.println("Pronasao NizImena"); :} ;
 
 Tip ::= INTEGER | CHAR
-  {: System.out.println("Pronasao Tip") :} ;
+  {: System.out.println("Pronasao Tip"); :} ;
 
 Blok ::= BEGIN NizNar END
-  {: System.out.println("Pronasao Blok") :} ;
+  {: System.out.println("Pronasao Blok"); :} ;
 
 NizNar ::= NizNar SEMI Naredba | Naredba
-  {: System.out.println("Pronasao NizNar") :} ;
+  {: System.out.println("Pronasao NizNar"); :} ;
 
 Naredba ::= Ulaz | Izlaz | Dodela | Blok | IfNar
-  {: System.out.println("Pronasao Naredba") :} ;
+  {: System.out.println("Pronasao Naredba"); :} ;
 
 Ulaz ::= READ LEFTPAR ID RIGHTPAR
-  {: System.out.println("Pronasao Ulaz") :} ;
+  {: System.out.println("Pronasao Ulaz"); :} ;
 
 Izlaz ::= WRITE LEFTPAR Izraz RIGHTPAR
-  {: System.out.println("Pronasao Izlaz") :} ;
+  {: System.out.println("Pronasao Izlaz"); :} ;
 
 Dodela ::= ID ASSIGN Izraz
-  {: System.out.println("Pronasao Dodela") :} ;
+  {: System.out.println("Pronasao Dodela"); :} ;
 
 Izraz ::= Izraz PLUS Pizraz | Pizraz
-  {: System.out.println("Pronasao Izraz") :} ;
+  {: System.out.println("Pronasao Izraz"); :} ;
 
 Pizraz ::= Pizraz STAR Fizraz | Fizraz
-  {: System.out.println("Pronasao Pizraz") :} ;
+  {: System.out.println("Pronasao Pizraz"); :} ;
 
 Fizraz ::= ID | CONST | LEFTPAR Izraz RIGHTPAR
-  {: System.out.println("Pronasao Fizraz") :} ;
+  {: System.out.println("Pronasao Fizraz"); :} ;
 
 IfNar ::= IF Izraz THEN Naredba ELSE Naredba
-  {: System.out.println("Pronasao IfNar") :} ;
+  {: System.out.println("Pronasao IfNar"); :} ;
 
