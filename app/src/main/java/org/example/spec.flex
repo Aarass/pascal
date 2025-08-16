@@ -25,6 +25,8 @@ digit=[0-9]
 
 %%
 
+[\t\r\n ] { ; }
+
 "(*" { yybegin(COMMENT); }
 <COMMENT>~"*)" { yybegin(YYINITIAL); }
 

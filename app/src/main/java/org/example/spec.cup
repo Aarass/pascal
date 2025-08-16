@@ -3,51 +3,51 @@ package org.example;
 terminal PROGRAM, LEFTPAR, RIGHTPAR, SEMI, DOT, COLON, COMMA, ASSIGN, PLUS, STAR, ID, CONST, VAR, INTEGER, CHAR, BEGIN, END, READ, WRITE, IF, THEN, ELSE;
 nonterminal Program, DeklProm, NizDekl, Deklaracija, NizImena, Tip, Blok, NizNar, Naredba, Ulaz, Izlaz, Dodela, Izraz, Pizraz, Fizraz, IfNar;
 
-Program ::= PROGRAM LEFTPAR NizImena LEFTPAR SEMI DeklProm Blok DOT
-  {: System.out.println("Pronasao Program"); :} ;
+Program ::= PROGRAM LEFTPAR NizImena RIGHTPAR SEMI DeklProm Blok DOT
+  {: System.out.println("Prepoznao Program"); :} ;
 
 DeklProm ::= VAR NizDekl
-  {: System.out.println("Pronasao DeklProm"); :} ;
+  {: System.out.println("Prepoznao DeklProm"); :} ;
 
 NizDekl ::= NizDekl Deklaracija | Deklaracija
-  {: System.out.println("Pronasao NizDekl"); :} ;
+  {: System.out.println("Prepoznao NizDekl"); :} ;
 
 Deklaracija ::= NizImena COLON Tip
-  {: System.out.println("Pronasao Deklaracija"); :} ;
+  {: System.out.println("Prepoznao Deklaracija"); :} ;
 
 NizImena ::= NizImena COMMA ID | ID
-  {: System.out.println("Pronasao NizImena"); :} ;
+  {: System.out.println("Prepoznao NizImena"); :} ;
 
 Tip ::= INTEGER | CHAR
-  {: System.out.println("Pronasao Tip"); :} ;
+  {: System.out.println("Prepoznao Tip"); :} ;
 
 Blok ::= BEGIN NizNar END
-  {: System.out.println("Pronasao Blok"); :} ;
+  {: System.out.println("Prepoznao Blok"); :} ;
 
 NizNar ::= NizNar SEMI Naredba | Naredba
-  {: System.out.println("Pronasao NizNar"); :} ;
+  {: System.out.println("Prepoznao NizNar"); :} ;
 
 Naredba ::= Ulaz | Izlaz | Dodela | Blok | IfNar
-  {: System.out.println("Pronasao Naredba"); :} ;
+  {: System.out.println("Prepoznao Naredba"); :} ;
 
 Ulaz ::= READ LEFTPAR ID RIGHTPAR
-  {: System.out.println("Pronasao Ulaz"); :} ;
+  {: System.out.println("Prepoznao Ulaz"); :} ;
 
 Izlaz ::= WRITE LEFTPAR Izraz RIGHTPAR
-  {: System.out.println("Pronasao Izlaz"); :} ;
+  {: System.out.println("Prepoznao Izlaz"); :} ;
 
 Dodela ::= ID ASSIGN Izraz
-  {: System.out.println("Pronasao Dodela"); :} ;
+  {: System.out.println("Prepoznao Dodela"); :} ;
 
 Izraz ::= Izraz PLUS Pizraz | Pizraz
-  {: System.out.println("Pronasao Izraz"); :} ;
+  {: System.out.println("Prepoznao Izraz"); :} ;
 
 Pizraz ::= Pizraz STAR Fizraz | Fizraz
-  {: System.out.println("Pronasao Pizraz"); :} ;
+  {: System.out.println("Prepoznao Pizraz"); :} ;
 
 Fizraz ::= ID | CONST | LEFTPAR Izraz RIGHTPAR
-  {: System.out.println("Pronasao Fizraz"); :} ;
+  {: System.out.println("Prepoznao Fizraz"); :} ;
 
 IfNar ::= IF Izraz THEN Naredba ELSE Naredba
-  {: System.out.println("Pronasao IfNar"); :} ;
+  {: System.out.println("Prepoznao IfNar"); :} ;
 
