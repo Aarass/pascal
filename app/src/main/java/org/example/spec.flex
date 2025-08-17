@@ -1,6 +1,7 @@
 package org.example;
 
 import java_cup.runtime.Symbol;
+import org.example.helper.*;
 
 %%
 
@@ -8,6 +9,10 @@ import java_cup.runtime.Symbol;
 
 %{
   KWTable table;
+
+  public int getLine() {
+    return yyline;
+  }
 %}
 
 %init{
@@ -42,15 +47,15 @@ digit=[0-9]
 ":" { return new Symbol(sym.COLON); }
 "." { return new Symbol(sym.DOT); }
 
-'{letter}' { return new Symbol(sym.CONST); }
-{digit}+ { return new Symbol(sym.CONST); }
+'{letter}' { return new Symbol(sym.CONST, new CharConst(yytext().charAt(1))); }
+{digit}+ { return new Symbol(sym.CONST, new IntConst(Integer.parseInt(yytext()))); }
 
 {letter}({letter}|{digit})* {
     var text = yytext();
     var symbol = table.getKW(text);
 
     if (symbol == -1) {
-      return new Symbol(sym.ID);
+      return new Symbol(sym.ID, text);
     } else {
       return new Symbol(symbol);
     }

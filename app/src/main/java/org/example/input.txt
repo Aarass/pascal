@@ -1,7 +1,13 @@
 program ( a, b );
-  var a : integer
+  var a : integer b : char
 
   begin 
-    read(a)
+    read(c);
+    write(a);
+    a := b;
+    b := 'a';
+    write(a + b);
+    write(a * b);
+    if b then write('a') else write('b');
   end
 .

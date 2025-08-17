@@ -1,7 +1,33 @@
 package org.example;
 
-terminal PROGRAM, LEFTPAR, RIGHTPAR, SEMI, DOT, COLON, COMMA, ASSIGN, PLUS, STAR, ID, CONST, VAR, INTEGER, CHAR, BEGIN, END, READ, WRITE, IF, THEN, ELSE;
-nonterminal Program, DeklProm, NizDekl, Deklaracija, NizImena, Tip, Blok, NizNar, Naredba, Ulaz, Izlaz, Dodela, Izraz, Pizraz, Fizraz, IfNar;
+import java.util.*;
+import symbolTable.*;
+import org.example.helper.*;
+
+parser code {:
+  SymbolTable table;
+  int errorCount;
+
+  public int getLine()
+  {
+    return (( Yylex ) getScanner()).getLine();
+  }
+:};
+
+init with {:
+  table = new SymbolTable();
+  errorCount = 0;
+:};
+
+terminal PROGRAM, LEFTPAR, RIGHTPAR, SEMI, DOT, COLON, COMMA, ASSIGN, PLUS, STAR, VAR, INTEGER, CHAR, BEGIN, END, READ, WRITE, IF, THEN, ELSE;
+terminal String ID;
+terminal Const CONST;
+
+nonterminal Program, DeklProm, NizDekl, Deklaracija, Blok, NizNar, Naredba, Ulaz, Izlaz, Dodela, IfNar;
+nonterminal ArrayList NizImena;
+nonterminal Type Tip;
+nonterminal Type Fizraz, Pizraz, Izraz;
+nonterminal Constant Konstanta;
 
 Program ::= PROGRAM LEFTPAR NizImena RIGHTPAR SEMI DeklProm Blok DOT
   {: System.out.println("Prepoznao Program"); :} ;
@@ -12,14 +38,45 @@ DeklProm ::= VAR NizDekl
 NizDekl ::= NizDekl Deklaracija | Deklaracija
   {: System.out.println("Prepoznao NizDekl"); :} ;
 
-Deklaracija ::= NizImena COLON Tip
-  {: System.out.println("Prepoznao Deklaracija"); :} ;
+Deklaracija ::= NizImena:imena COLON Tip:tip
+  {:
+    System.out.println("Prepoznao Deklaracija"); 
 
-NizImena ::= NizImena COMMA ID | ID
-  {: System.out.println("Prepoznao NizImena"); :} ;
+    for (String ime : (ArrayList<String>)imena) {
+      boolean result = parser.table.addVar(ime, tip);
 
-Tip ::= INTEGER | CHAR
-  {: System.out.println("Prepoznao Tip"); :} ;
+      if (result == false) {
+	System.out.println("Greska. Promenljiva je vec deklarisana");
+	parser.errorCount++;
+      }
+    }
+  :} ;
+
+NizImena ::= 
+  NizImena:niz COMMA ID:id
+    {:
+      RESULT = niz;
+      RESULT.add(id);
+    :} |
+  ID:id
+    {:
+      RESULT = new ArrayList<String>();
+      RESULT.add(id);
+    :} ;
+
+Tip ::= 
+  INTEGER 
+    {:
+      System.out.println("Prepoznao Tip");
+
+      RESULT = parser.table.getType("integer");
+    :} |
+  CHAR
+    {:
+      System.out.println("Prepoznao Tip");
+
+      RESULT = parser.table.getType("char");
+    :} ;
 
 Blok ::= BEGIN NizNar END
   {: System.out.println("Prepoznao Blok"); :} ;
@@ -30,24 +87,133 @@ NizNar ::= NizNar SEMI Naredba | Naredba
 Naredba ::= Ulaz | Izlaz | Dodela | Blok | IfNar
   {: System.out.println("Prepoznao Naredba"); :} ;
 
-Ulaz ::= READ LEFTPAR ID RIGHTPAR
-  {: System.out.println("Prepoznao Ulaz"); :} ;
+Ulaz ::= READ LEFTPAR ID:id RIGHTPAR
+  {:
+    System.out.println("Prepoznao Ulaz");
+
+    Variable vr = parser.table.getVar(id);
+    if (vr == null) {
+      System.out.println("Greska. Promenljiva nije deklarisana.");
+      parser.errorCount++;
+    } else {
+      vr.last_def = parser.getLine();
+    }
+  :} ;
 
 Izlaz ::= WRITE LEFTPAR Izraz RIGHTPAR
   {: System.out.println("Prepoznao Izlaz"); :} ;
 
-Dodela ::= ID ASSIGN Izraz
-  {: System.out.println("Prepoznao Dodela"); :} ;
+Dodela ::= ID:id ASSIGN Izraz:exp
+  {: 
+    System.out.println("Prepoznao Dodela");
 
-Izraz ::= Izraz PLUS Pizraz | Pizraz
-  {: System.out.println("Prepoznao Izraz"); :} ;
+    Variable vr = parser.table.getVar(id);
 
-Pizraz ::= Pizraz STAR Fizraz | Fizraz
-  {: System.out.println("Prepoznao Pizraz"); :} ;
+    if (vr == null) {
+      System.out.println("Greska. Promenljiva nije deklarisana.");
+      parser.errorCount++;
+    } else {
+      vr.last_def = parser.getLine();
 
-Fizraz ::= ID | CONST | LEFTPAR Izraz RIGHTPAR
-  {: System.out.println("Prepoznao Fizraz"); :} ;
+      if (vr.type != exp) {
+	System.out.println("Greska. Tip izraza nije u skladu sa tipom promenljive kojoj se dodeljuje");
+	parser.errorCount++;
+      }
 
-IfNar ::= IF Izraz THEN Naredba ELSE Naredba
-  {: System.out.println("Prepoznao IfNar"); :} ;
+    }
+  :} ;
+
+Izraz ::= 
+  Izraz:i1 PLUS Pizraz:i2
+    {: 
+      System.out.println("Prepoznao Izraz");
+
+      if (i1.tkind == Type.INTEGER && i1.type != i2.type) {
+	System.out.println("Greska. Operator + radi samo sa operandima tipa integer");
+	parser.errorCount++;
+      }
+
+      RESULT = i1.type;
+    :} |
+  Pizraz:i
+    {: 
+      System.out.println("Prepoznao Izraz");
+
+      RESULT = i.type;
+    :} ;
+
+Pizraz ::=
+  Pizraz:i1 STAR Fizraz:i2
+    {: 
+      System.out.println("Prepoznao Pizraz");
+
+      if (i1.tkind == Type.INTEGER && i1.type != i2.type) {
+	System.out.println("Greska. Operator * radi samo sa operandima tipa integer");
+	parser.errorCount++;
+      }
+
+      RESULT = i1.type;
+    :} |
+  Fizraz:i
+    {:
+      System.out.println("Prepoznao Pizraz");
+
+      RESULT = i.type;
+    :} ;
+
+Fizraz ::= 
+  ID:id
+  {: 
+    System.out.println("Prepoznao Fizraz");
+
+    Variable vr = parser.table.getVar(id);
+
+    if (vr == null) {
+      System.out.println("Greska. Promenljiva nije deklarisana.");
+      parser.errorCount++;
+    } else {
+      if (vr.last_def == -1) {
+	System.out.println("Greska. Koriscenje promenljive kojoj nije dodeljena vrednost.");
+	parser.errorCount++;
+      }
+
+      RESULT = vr.type;
+    }
+  :} | 
+  Konstanta:c
+    {: 
+      System.out.println("Prepoznao Fizraz");
+
+      RESULT = c.type;
+    :} |
+  LEFTPAR Izraz:i RIGHTPAR
+    {: 
+      System.out.println("Prepoznao Fizraz");
+
+      RESULT = i.type;
+    :} ;
+
+Konstanta ::=
+  CONST:c
+    {: 
+      Type type = parser.table.getType(c.type);
+
+      if (type.tkind == Type.INTEGER) {
+	RESULT = new Constant(type, ((IntConst) c).value);
+      } else if (type.tkind == Type.CHARACTER) {
+	RESULT = new Constant(type, ((CharConst) c).value);
+      } else {
+	throw new Exception("Lexer error");
+      }
+    :};
+
+IfNar ::= IF Izraz:i THEN Naredba ELSE Naredba
+  {:
+    System.out.println("Prepoznao IfNar");
+
+    if (i.tkind != Type.INTEGER) {
+      System.out.println("Greska. Uslov if naredbe mora biti tipa integer");
+      parser.errorCount++;
+    }
+  :} ;
 

@@ -5,6 +5,7 @@
 package org.example;
 
 import java_cup.runtime.Symbol;
+import org.example.helper.*;
 
 
 @SuppressWarnings("fallthrough")
@@ -96,7 +97,7 @@ class Yylex implements java_cup.runtime.Scanner {
   private static final String ZZ_ACTION_PACKED_0 =
     "\2\0\1\1\1\2\1\1\1\3\1\4\1\5\1\6"+
     "\1\7\1\10\1\11\1\12\1\13\1\14\2\0\1\15"+
-    "\1\16\1\17\1\11";
+    "\1\16\1\17\1\20";
 
   private static int [] zzUnpackAction() {
     int [] result = new int[21];
@@ -286,6 +287,10 @@ class Yylex implements java_cup.runtime.Scanner {
 
   /* user code: */
   KWTable table;
+
+  public int getLine() {
+    return yyline;
+  }
 
 
   /**
@@ -660,84 +665,89 @@ class Yylex implements java_cup.runtime.Scanner {
             { System.out.println("Error!");
             }
           // fall through
-          case 16: break;
+          case 17: break;
           case 2:
             { ;
             }
           // fall through
-          case 17: break;
+          case 18: break;
           case 3:
             { return new Symbol(sym.LEFTPAR);
             }
           // fall through
-          case 18: break;
+          case 19: break;
           case 4:
             { return new Symbol(sym.RIGHTPAR);
             }
           // fall through
-          case 19: break;
+          case 20: break;
           case 5:
             { return new Symbol(sym.STAR);
             }
           // fall through
-          case 20: break;
+          case 21: break;
           case 6:
             { return new Symbol(sym.PLUS);
             }
           // fall through
-          case 21: break;
+          case 22: break;
           case 7:
             { return new Symbol(sym.COMMA);
             }
           // fall through
-          case 22: break;
+          case 23: break;
           case 8:
             { return new Symbol(sym.DOT);
             }
           // fall through
-          case 23: break;
+          case 24: break;
           case 9:
-            { return new Symbol(sym.CONST);
+            { return new Symbol(sym.CONST, new IntConst(Integer.parseInt(yytext())));
             }
           // fall through
-          case 24: break;
+          case 25: break;
           case 10:
             { return new Symbol(sym.COLON);
             }
           // fall through
-          case 25: break;
+          case 26: break;
           case 11:
             { return new Symbol(sym.SEMI);
             }
           // fall through
-          case 26: break;
+          case 27: break;
           case 12:
             { var text = yytext();
     var symbol = table.getKW(text);
 
     if (symbol == -1) {
-      return new Symbol(sym.ID);
+      return new Symbol(sym.ID, text);
     } else {
       return new Symbol(symbol);
     }
             }
           // fall through
-          case 27: break;
+          case 28: break;
           case 13:
             { yybegin(COMMENT);
             }
           // fall through
-          case 28: break;
+          case 29: break;
           case 14:
             { return new Symbol(sym.ASSIGN);
             }
           // fall through
-          case 29: break;
+          case 30: break;
           case 15:
             { yybegin(YYINITIAL);
             }
           // fall through
-          case 30: break;
+          case 31: break;
+          case 16:
+            { return new Symbol(sym.CONST, new CharConst(yytext().charAt(1)));
+            }
+          // fall through
+          case 32: break;
           default:
             zzScanError(ZZ_NO_MATCH);
         }
