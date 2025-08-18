@@ -3,6 +3,7 @@ package org.example;
 import java.util.*;
 import symbolTable.*;
 import org.example.helper.*;
+import AST.*;
 
 parser code {:
   SymbolTable table;
@@ -23,14 +24,21 @@ terminal PROGRAM, LEFTPAR, RIGHTPAR, SEMI, DOT, COLON, COMMA, ASSIGN, PLUS, STAR
 terminal String ID;
 terminal Const CONST;
 
-nonterminal Program, DeklProm, NizDekl, Deklaracija, Blok, NizNar, Naredba, Ulaz, Izlaz, Dodela, IfNar;
+nonterminal DeklProm, NizDekl, Deklaracija, Ulaz, Izlaz, Dodela, IfNar;
+nonterminal Statement Naredba;
+nonterminal Block NizNar;
+nonterminal Block Program, Blok;
 nonterminal ArrayList NizImena;
 nonterminal Type Tip;
 nonterminal Type Fizraz, Pizraz, Izraz;
 nonterminal Constant Konstanta;
 
-Program ::= PROGRAM LEFTPAR NizImena RIGHTPAR SEMI DeklProm Blok DOT
-  {: System.out.println("Prepoznao Program"); :} ;
+Program ::= PROGRAM LEFTPAR NizImena RIGHTPAR SEMI DeklProm Blok:b DOT
+  {: 
+    System.out.println("Prepoznao Program");
+
+    RESULT = b;
+  :} ;
 
 DeklProm ::= VAR NizDekl
   {: System.out.println("Prepoznao DeklProm"); :} ;
@@ -78,14 +86,60 @@ Tip ::=
       RESULT = parser.table.getType("char");
     :} ;
 
-Blok ::= BEGIN NizNar END
-  {: System.out.println("Prepoznao Blok"); :} ;
+Blok ::= BEGIN NizNar:nn END
+  {: 
+    System.out.println("Prepoznao Blok");
 
-NizNar ::= NizNar SEMI Naredba | Naredba
-  {: System.out.println("Prepoznao NizNar"); :} ;
+    RESULT = nn;
+  :} ;
 
-Naredba ::= Ulaz | Izlaz | Dodela | Blok | IfNar
-  {: System.out.println("Prepoznao Naredba"); :} ;
+NizNar ::= 
+  NizNar:nn SEMI Naredba:n
+    {:
+      System.out.println("Prepoznao NizNar");
+
+      RESULT = nn;
+      RESULT.addStatement(n);
+    :} |
+  Naredba:n
+    {:
+      System.out.println("Prepoznao NizNar");
+
+      RESULT = new Block();
+      RESULT.addStatement(n);
+    :} ;
+
+Naredba ::= 
+  Ulaz:u
+    {:
+      System.out.println("Prepoznao Naredba");
+
+      RESULT = u;
+    :} |
+  Izlaz:i
+    {:
+      System.out.println("Prepoznao Naredba");
+
+      RESULT = i;
+    :} |
+  Dodela:d
+    {:
+      System.out.println("Prepoznao Naredba");
+
+      RESULT = d;
+    :} |
+  Blok: b
+    {:
+      System.out.println("Prepoznao Naredba");
+
+      RESULT = b;
+    :} |
+  IfNar:in
+    {:
+      System.out.println("Prepoznao Naredba");
+
+      RESULT = in;
+    :} ;
 
 Ulaz ::= READ LEFTPAR ID:id RIGHTPAR
   {:
@@ -97,11 +151,17 @@ Ulaz ::= READ LEFTPAR ID:id RIGHTPAR
       parser.errorCount++;
     } else {
       vr.last_def = parser.getLine();
+      
+      RESULT = new ReadStatement(vr);
     }
   :} ;
 
-Izlaz ::= WRITE LEFTPAR Izraz RIGHTPAR
-  {: System.out.println("Prepoznao Izlaz"); :} ;
+Izlaz ::= WRITE LEFTPAR Izraz:exp RIGHTPAR
+  {: 
+    System.out.println("Prepoznao Izlaz");
+
+    RESULT = new WriteStatement(exp);
+  :} ;
 
 Dodela ::= ID:id ASSIGN Izraz:exp
   {: 
@@ -120,6 +180,7 @@ Dodela ::= ID:id ASSIGN Izraz:exp
 	parser.errorCount++;
       }
 
+      RESULT = new Assignment(vr, exp);
     }
   :} ;
 
